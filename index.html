@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klink — QLine Messenger</title>
+    <style>
+        :root {
+            --bg-dark: #313338;
+            --bg-sidebar: #2b2d31;
+            --bg-panel: #1e1f22;
+            --bg-input: #383a40;
+            --accent: #5865f2;
+            --accent-hover: #4752c4;
+            --text-main: #dbdee1;
+            --text-muted: #949ba4;
+            --danger: #f23f43;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .auth-card {
+            background-color: var(--bg-sidebar);
+            padding: 30px;
+            border-radius: 8px;
+            width: 400px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .auth-card h2 {
+            margin-bottom: 8px;
+            color: white;
+            text-align: center;
+        }
+
+        .auth-card .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--bg-input);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: 2px solid var(--accent);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .switch-auth {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .switch-auth a {
+            color: var(--accent);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #1f2023;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+            border-bottom: 2px solid var(--bg-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .channels-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .channel-item {
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            transition: background 0.1s, color 0.1s;
+        }
+
+        .channel-item:hover, .channel-item.active {
+            background-color: var(--bg-input);
+            color: white;
+        }
+
+        .user-profile {
+            padding: 10px 15px;
+            background-color: #232428;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-info-box {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .user-display-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-tag {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .settings-btn:hover {
+            color: white;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-dark);
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #1f2023;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .msg-author {
+            font-weight: bold;
+            color: white;
+            font-size: 14px;
+        }
+
+        .msg-usertag {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .msg-time {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .msg-text {
+            color: var(--text-main);
+            font-size: 14px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .chat-input-box {
+            padding: 20px;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-input);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--bg-sidebar);
+            padding: 30px;
+            border-radius: 8px;
+            width: 400px;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: white;
+        }
+        .btn-secondary:hover {
+            text-decoration: underline;
+            background-color: transparent;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ЭКРАН АВТОРИЗАЦИИ / РЕГИСТРАЦИИ -->
+    <div id="auth-screen" class="screen">
+        <div class="auth-card">
+            <h2 id="auth-title">Войти в QLine ID</h2>
+            <div class="subtitle">Klink Messenger</div>
+
+            <div id="register-fields" class="hidden">
+                <div class="form-group">
+                    <label>QLine ID (@username)</label>
+                    <input type="text" id="reg-username" class="form-control" placeholder="например: plast1x">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="auth-email" class="form-control" placeholder="name@example.com">
+            </div>
+
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" id="auth-password" class="form-control" placeholder="••••••••">
+            </div>
+
+            <button id="auth-btn" class="btn">Войти</button>
+            <div id="auth-error" class="error-msg"></div>
+
+            <div class="switch-auth">
+                <span id="switch-text">Нужен аккаунт?</span> 
+                <a id="switch-btn">Зарегистрироваться</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ОСНОВНОЙ ЭКРАН МЕССЕНДЖЕРА -->
+    <div id="app-screen" class="screen hidden">
+        <div class="app-container">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <span>Klink <span style="font-size: 11px; color: var(--text-muted);">by QLine</span></span>
+                </div>
+                <div class="channels-list" id="channels-list">
+                    <div class="channel-item active" data-id="general"># общий</div>
+                    <div class="channel-item" data-id="development"># разработка</div>
+                    <div class="channel-item" data-id="random"># флудилка</div>
+                </div>
+                <div class="user-profile">
+                    <div class="user-info-box">
+                        <span class="user-display-name" id="current-display-name">Имя</span>
+                        <span class="user-tag" id="current-username">@username</span>
+                    </div>
+                    <button class="settings-btn" id="open-settings" title="Настройки">⚙️</button>
+                </div>
+            </div>
+
+            <div class="chat-area">
+                <div class="chat-header" id="current-channel-title"># общий</div>
+                <div class="messages-container" id="messages-container"></div>
+                <div class="chat-input-box">
+                    <input type="text" id="message-input" class="chat-input" placeholder="Написать в #общий...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Настройки профиля</h3>
+            <div class="form-group">
+                <label>Отображаемое имя</label>
+                <input type="text" id="settings-display-name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Ваш QLine ID (нельзя изменить)</label>
+                <input type="text" id="settings-username" class="form-control" disabled style="opacity: 0.6; cursor: not-allowed;">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="logout-btn" style="background-color: var(--danger); width: auto;">Выйти</button>
+                <button class="btn btn-secondary" id="close-settings" style="width: auto;">Отмена</button>
+                <button class="btn" id="save-settings" style="width: auto;">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged,
+            updateProfile
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { 
+            getDatabase, 
+            ref, 
+            set, 
+            get, 
+            child, 
+            push, 
+            onChildAdded, 
+            query, 
+            limitToLast 
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDAqhpRWmEwIVqCrCFqhLfWxMCC1ydi6wU",
+            authDomain: "test-dd8b2.firebaseapp.com",
+            databaseURL: "https://test-dd8b2-default-rtdb.firebaseio.com",
+            projectId: "test-dd8b2",
+            storageBucket: "test-dd8b2.firebasestorage.app",
+            messagingSenderId: "690098521394",
+            appId: "1:690098521394:web:7ff1a6349e9c231454c32b",
+            measurementId: "G-8C38ZFZP7E"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let isRegistering = false;
+        let currentChannel = "general";
+        let currentUserData = null;
+
+        const authScreen = document.getElementById("auth-screen");
+        const appScreen = document.getElementById("app-screen");
+        const authTitle = document.getElementById("auth-title");
+        const authBtn = document.getElementById("auth-btn");
+        const switchBtn = document.getElementById("switch-btn");
+        const switchText = document.getElementById("switch-text");
+        const registerFields = document.getElementById("register-fields");
+        const authError = document.getElementById("auth-error");
+
+        const authEmailInput = document.getElementById("auth-email");
+        const authPasswordInput = document.getElementById("auth-password");
+        const regUsernameInput = document.getElementById("reg-username");
+
+        const currentDisplayNameEl = document.getElementById("current-display-name");
+        const currentUsernameEl = document.getElementById("current-username");
+
+        const settingsModal = document.getElementById("settings-modal");
+        const openSettingsBtn = document.getElementById("open-settings");
+        const closeSettingsBtn = document.getElementById("close-settings");
+        const saveSettingsBtn = document.getElementById("save-settings");
+        const logoutBtn = document.getElementById("logout-btn");
+        const settingsDisplayName = document.getElementById("settings-display-name");
+        const settingsUsername = document.getElementById("settings-username");
+
+        const channelsList = document.getElementById("channels-list");
+        const currentChannelTitle = document.getElementById("current-channel-title");
+        const messageInput = document.getElementById("message-input");
+        const messagesContainer = document.getElementById("messages-container");
+
+        switchBtn.addEventListener("click", () => {
+            isRegistering = !isRegistering;
+            if (isRegistering) {
+                authTitle.textContent = "Регистрация в QLine ID";
+                authBtn.textContent = "Зарегистрироваться";
+                switchText.textContent = "Уже есть аккаунт?";
+                switchBtn.textContent = "Войти";
+                registerFields.classList.remove("hidden");
+            } else {
+                authTitle.textContent = "Войти в QLine ID";
+                authBtn.textContent = "Войти";
+                switchText.textContent = "Нужен аккаунт?";
+                switchBtn.textContent = "Зарегистрироваться";
+                registerFields.classList.add("hidden");
+            }
+            authError.textContent = "";
+        });
+
+        authBtn.addEventListener("click", async () => {
+            const email = authEmailInput.value.trim();
+            const password = authPasswordInput.value.trim();
+            authError.textContent = "";
+
+            if (!email || !password) {
+                authError.textContent = "Заполните все поля!";
+                return;
+            }
+
+            try {
+                if (isRegistering) {
+                    const username = regUsernameInput.value.trim().toLowerCase();
+                    if (!username || username.length < 3) {
+                        authError.textContent = "QLine ID должен быть не менее 3 символов!";
+                        return;
+                    }
+
+                    const usernameRef = ref(db, 'usernames/' + username);
+                    const snapshot = await get(usernameRef);
+                    if (snapshot.exists()) {
+                        authError.textContent = "Этот QLine ID уже занят!";
+                        return;
+                    }
+
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+
+                    await updateProfile(user, { displayName: username });
+
+                    await set(ref(db, 'users/' + user.uid), {
+                        uid: user.uid,
+                        username: username,
+                        displayName: username,
+                        email: email
+                    });
+
+                    await set(usernameRef, user.uid);
+
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+            } catch (error) {
+                authError.textContent = "Ошибка: " + error.message;
+            }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                authScreen.classList.add("hidden");
+                appScreen.classList.remove("hidden");
+
+                const userSnapshot = await get(child(ref(db), `users/${user.uid}`));
+                if (userSnapshot.exists()) {
+                    currentUserData = userSnapshot.val();
+                } else {
+                    currentUserData = {
+                        uid: user.uid,
+                        username: user.displayName || "user",
+                        displayName: user.displayName || "user"
+                    };
+                }
+
+                updateUserInterface();
+                loadMessagesForChannel(currentChannel);
+            } else {
+                appScreen.classList.add("hidden");
+                authScreen.classList.remove("hidden");
+                currentUserData = null;
+            }
+        });
+
+        function updateUserInterface() {
+            if (!currentUserData) return;
+            currentDisplayNameEl.textContent = currentUserData.displayName;
+            currentUsernameEl.textContent = "@" + currentUserData.username;
+        }
+
+        logoutBtn.addEventListener("click", () => {
+            signOut(auth);
+            settingsModal.classList.add("hidden");
+        });
+
+        openSettingsBtn.addEventListener("click", () => {
+            if (!currentUserData) return;
+            settingsDisplayName.value = currentUserData.displayName;
+            settingsUsername.value = "@" + currentUserData.username;
+            settingsModal.classList.remove("hidden");
+        });
+
+        closeSettingsBtn.addEventListener("click", () => {
+            settingsModal.classList.add("hidden");
+        });
+
+        saveSettingsBtn.addEventListener("click", async () => {
+            const newDisplayName = settingsDisplayName.value.trim();
+            if (!newDisplayName) return;
+
+            try {
+                await updateProfile(auth.currentUser, { displayName: newDisplayName });
+                await set(ref(db, `users/${auth.currentUser.uid}/displayName`), newDisplayName);
+
+                currentUserData.displayName = newDisplayName;
+                updateUserInterface();
+                settingsModal.classList.add("hidden");
+            } catch (error) {
+                alert("Ошибка сохранения: " + error.message);
+            }
+        });
+
+        document.querySelectorAll(".channel-item").forEach(item => {
+            item.addEventListener("click", (e) => {
+                document.querySelectorAll(".channel-item").forEach(i => i.classList.remove("active"));
+                e.target.classList.add("active");
+                currentChannel = e.target.getAttribute("data-id");
+                currentChannelTitle.textContent = e.target.textContent;
+                messageInput.placeholder = `Написать в ${e.target.textContent}...`;
+                loadMessagesForChannel(currentChannel);
+            });
+        });
+
+        messageInput.addEventListener("keydown", async (e) => {
+            if (e.key === "Enter" && messageInput.value.trim() !== "") {
+                const text = messageInput.value.trim();
+                messageInput.value = "";
+
+                const messagesRef = ref(db, 'messages/' + currentChannel);
+                const newMessageRef = push(messagesRef);
+
+                await set(newMessageRef, {
+                    uid: currentUserData.uid,
+                    author: currentUserData.displayName,
+                    username: currentUserData.username,
+                    text: text,
+                    timestamp: Date.now()
+                });
+            }
+        });
+
+        function loadMessagesForChannel(channelId) {
+            messagesContainer.innerHTML = "";
+            const messagesRef = query(ref(db, 'messages/' + channelId), limitToLast(50));
+
+            onChildAdded(messagesRef, (snapshot) => {
+                const msg = snapshot.val();
+                appendMessage(msg);
+            });
+        }
+
+        function appendMessage(msg) {
+            const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const msgEl = document.createElement("div");
+            msgEl.className = "message";
+            msgEl.innerHTML = `
+                <div class="message-header">
+                    <span class="msg-author">${escapeHtml(msg.author)}</span>
+                    <span class="msg-usertag">@${escapeHtml(msg.username)}</span>
+                    <span class="msg-time">${timeStr}</span>
+                </div>
+                <div class="msg-text">${escapeHtml(msg.text)}</div>
+            `;
+            messagesContainer.appendChild(msgEl);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+    </script>
+</body>
+</html>
